@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="/src/styles.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>设置</title>
+    <script type="module" src="/src/settings.ts" defer></script>
+  </head>
+
+  <body>
+    <main class="page">
+      <div class="page-content">
+        <h1>设置</h1>
+
+        <div class="form-row">
+          <label for="root-path">ComfyUI 安装根目录</label>
+          <div class="field">
+            <input type="text" id="root-path" placeholder="例如：D:\ai\ComfyUI" />
+            <button id="browse-btn">浏览...</button>
+          </div>
+          <div class="hint">保存后将自动重启 ComfyUI 以应用新路径</div>
+          <div class="error-box" id="error-box" hidden></div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button id="cancel-btn">取消</button>
+        <button class="primary" id="save-btn">保存</button>
+      </div>
+    </main>
+  </body>
+</html>

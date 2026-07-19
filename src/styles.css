@@ -1,0 +1,248 @@
+:root {
+  color-scheme: light dark;
+  font-family: "Segoe UI", Inter, Avenir, Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #1a1a1a;
+  background-color: #f6f6f6;
+  --border: #d9d9d9;
+  --muted: #666;
+  --accent: #396cd8;
+  --danger: #c0392b;
+  --success: #2e7d32;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color: #e8e8e8;
+    background-color: #1e1e1e;
+    --border: #3a3a3a;
+    --muted: #a0a0a0;
+    --accent: #6ea0ff;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+button {
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  padding: 0.5em 1em;
+  font-size: 1em;
+  font-family: inherit;
+  color: inherit;
+  background-color: transparent;
+  cursor: pointer;
+}
+
+button:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+button.primary {
+  background-color: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+button.primary:hover:not(:disabled) {
+  color: #fff;
+  opacity: 0.9;
+}
+
+input[type="text"] {
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  padding: 0.5em 0.7em;
+  font-size: 1em;
+  font-family: inherit;
+  color: inherit;
+  background-color: transparent;
+}
+
+/* --- loading screen (index.html) --- */
+.loading-screen {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25em;
+  padding: 2em;
+  text-align: center;
+}
+
+.app-logo {
+  width: clamp(112px, 14vw, 156px);
+  height: auto;
+  margin-bottom: 0.25em;
+  filter: drop-shadow(0 10px 24px rgba(38, 92, 255, 0.2));
+}
+
+.spinner {
+  width: 2.5em;
+  height: 2.5em;
+  border-radius: 50%;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.status-title {
+  font-size: 1.2em;
+  font-weight: 600;
+}
+
+.status-title.failed {
+  color: var(--danger);
+}
+
+.log-tail {
+  width: min(720px, 90vw);
+  max-height: 240px;
+  overflow-y: auto;
+  text-align: left;
+  background: rgba(127, 127, 127, 0.08);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.75em;
+  font-family: "Cascadia Code", Consolas, monospace;
+  font-size: 0.85em;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+/* --- utility windows (nodes.html, settings.html) --- */
+.page {
+  padding: 1.25em;
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+  height: 100vh;
+}
+
+.page h1 {
+  font-size: 1.1em;
+  margin: 0;
+}
+
+.page-content {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+}
+
+.clone-bar {
+  display: flex;
+  gap: 0.5em;
+  align-items: center;
+}
+
+.clone-bar input {
+  flex: 1;
+}
+
+.hint {
+  font-size: 0.85em;
+  color: var(--muted);
+}
+
+.hint.warn {
+  color: var(--danger);
+}
+
+.node-table-wrap {
+  flex: 1;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9em;
+}
+
+thead th {
+  position: sticky;
+  top: 0;
+  background: var(--border);
+  text-align: left;
+  padding: 0.5em 0.75em;
+}
+
+tbody td {
+  padding: 0.5em 0.75em;
+  border-top: 1px solid var(--border);
+  vertical-align: top;
+}
+
+tbody tr.highlight {
+  background: rgba(57, 108, 216, 0.15);
+}
+
+.row-status {
+  display: block;
+  font-size: 0.85em;
+  color: var(--muted);
+  margin-top: 0.25em;
+}
+
+.row-status.error {
+  color: var(--danger);
+}
+
+.row-status.ok {
+  color: var(--success);
+}
+
+.form-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4em;
+}
+
+.form-row .field {
+  display: flex;
+  gap: 0.5em;
+}
+
+.form-row .field input {
+  flex: 1;
+}
+
+.actions {
+  display: flex;
+  gap: 0.5em;
+  justify-content: flex-end;
+  flex-shrink: 0;
+  padding-top: 0.75em;
+  border-top: 1px solid var(--border);
+}
+
+.error-box {
+  color: var(--danger);
+  font-size: 0.9em;
+}

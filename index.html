@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="/src/styles.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ComfyUI Launcher</title>
+    <script type="module" src="/src/main.ts" defer></script>
+  </head>
+
+  <body>
+    <main class="loading-screen" id="app">
+      <img
+        class="app-logo"
+        src="/src/assets/branding/comfyui-launcher-logo.png"
+        alt="ComfyUI Launcher"
+      />
+      <div class="spinner" id="spinner"></div>
+      <div class="status-title" id="status-title">正在启动 ComfyUI...</div>
+      <pre class="log-tail" id="log-tail" hidden></pre>
+      <button class="primary" id="retry-btn" hidden>重试</button>
+    </main>
+  </body>
+</html>

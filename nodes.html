@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="/src/styles.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>自定义节点管理</title>
+    <script type="module" src="/src/nodes.ts" defer></script>
+  </head>
+
+  <body>
+    <main class="page">
+      <h1>自定义节点管理</h1>
+
+      <div class="clone-bar">
+        <input type="text" id="clone-url" placeholder="粘贴 GitHub 仓库地址..." />
+        <button class="primary" id="clone-btn" disabled>Clone</button>
+        <button id="refresh-btn">刷新</button>
+      </div>
+      <div class="hint" id="clone-hint"></div>
+
+      <div class="node-table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>名称</th>
+              <th>当前版本</th>
+              <th>GitHub 版本</th>
+              <th>最近更新</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="node-rows">
+            <tr>
+              <td colspan="5">加载中...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </body>
+</html>
