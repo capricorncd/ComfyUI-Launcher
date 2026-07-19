@@ -22,6 +22,15 @@ pub fn run() {
             let app_state = Arc::new(AppState::new(cfg));
             app.manage(app_state.clone());
 
+            // Explicitly apply the embedded transparent icon to the native
+            // window. Windows can otherwise keep showing a stale cached icon
+            // for the stable dev executable/App ID after icon assets change.
+            if let (Some(window), Some(icon)) =
+                (app.get_webview_window("main"), app.default_window_icon())
+            {
+                window.set_icon(icon.clone())?;
+            }
+
             // The window's initial navigation to index.html hasn't necessarily
             // started yet at this point in setup() — `window.url()` can still
             // report "about:blank" here. Poll briefly until it reflects the
