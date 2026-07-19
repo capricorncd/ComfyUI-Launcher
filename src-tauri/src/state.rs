@@ -6,7 +6,7 @@ use url::Url;
 
 use crate::config::Config;
 
-const LOG_CAPACITY: usize = 2000;
+const LOG_CAPACITY: usize = 500;
 
 #[derive(Debug, Clone, Serialize, PartialEq)]
 #[serde(tag = "state", rename_all = "camelCase", rename_all_fields = "camelCase")]

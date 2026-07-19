@@ -12,11 +12,6 @@ pub fn get_status(state: State<Arc<AppState>>) -> ComfyStatus {
 }
 
 #[tauri::command]
-pub fn get_log_tail(state: State<Arc<AppState>>) -> Vec<String> {
-    state.comfy.lock().unwrap().log_tail()
-}
-
-#[tauri::command]
 pub async fn start_or_restart(app: AppHandle, state: State<'_, Arc<AppState>>) -> Result<(), String> {
     process::start_or_restart(app, state.inner().clone()).await
 }

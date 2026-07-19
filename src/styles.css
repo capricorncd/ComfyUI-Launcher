@@ -246,23 +246,3 @@ tbody tr.highlight {
   color: var(--danger);
   font-size: 0.9em;
 }
-
-.toolbar {
-  display: flex;
-  gap: 0.5em;
-  align-items: center;
-}
-
-.log-viewer {
-  flex: 1;
-  overflow-y: auto;
-  text-align: left;
-  background: rgba(127, 127, 127, 0.08);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 0.75em;
-  font-family: "Cascadia Code", Consolas, monospace;
-  font-size: 0.85em;
-  white-space: pre-wrap;
-  word-break: break-all;
-}

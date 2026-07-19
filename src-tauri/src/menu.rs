@@ -11,7 +11,6 @@ pub fn build_and_attach(app: &AppHandle) -> Result<(), String> {
     let reload_page = MenuItemBuilder::with_id("reload_page", "刷新页面").build(app).map_err(|e| e.to_string())?;
     let update_comfyui = MenuItemBuilder::with_id("update_comfyui", "更新 ComfyUI 代码").build(app).map_err(|e| e.to_string())?;
     let manage_nodes = MenuItemBuilder::with_id("manage_nodes", "自定义节点管理").build(app).map_err(|e| e.to_string())?;
-    let view_log = MenuItemBuilder::with_id("view_log", "查看日志").build(app).map_err(|e| e.to_string())?;
     let open_comfyui_dir = MenuItemBuilder::with_id("open_comfyui_dir", "ComfyUI 目录").build(app).map_err(|e| e.to_string())?;
     let open_nodes_dir = MenuItemBuilder::with_id("open_nodes_dir", "自定义节点目录").build(app).map_err(|e| e.to_string())?;
     let open_output_dir = MenuItemBuilder::with_id("open_output_dir", "输出目录").build(app).map_err(|e| e.to_string())?;
@@ -32,7 +31,6 @@ pub fn build_and_attach(app: &AppHandle) -> Result<(), String> {
         .item(&update_comfyui)
         .separator()
         .item(&manage_nodes)
-        .item(&view_log)
         .item(&open_submenu)
         .separator()
         .item(&settings)
@@ -76,9 +74,6 @@ pub fn build_and_attach(app: &AppHandle) -> Result<(), String> {
             }
             "manage_nodes" => {
                 let _ = windows::open_nodes_window(app);
-            }
-            "view_log" => {
-                let _ = windows::open_log_window(app);
             }
             "open_comfyui_dir" => {
                 let _ = windows::open_folder(app, &state, "comfyui");

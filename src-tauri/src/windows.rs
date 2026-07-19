@@ -58,11 +58,6 @@ pub fn open_settings_window(app: &AppHandle) -> Result<(), String> {
     open_or_focus(app, "settings", "settings.html", "设置", size, true)
 }
 
-pub fn open_log_window(app: &AppHandle) -> Result<(), String> {
-    let size = dialog_window_size(app);
-    open_or_focus(app, "log", "log.html", "日志", size, true)
-}
-
 /// Reloads whatever page is currently loaded in the main window (the
 /// ComfyUI UI, or the loading screen) without touching the ComfyUI process
 /// — for when only a custom node's JS/CSS changed and a full restart isn't
