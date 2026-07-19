@@ -142,6 +142,7 @@ pub async fn start_or_restart(app: AppHandle, state: Arc<AppState>) -> Result<()
         .arg("-s")
         .arg(config.main_py())
         .arg("--windows-standalone-build")
+        .arg("--disable-auto-launch")
         .arg("--disable-api-nodes")
         .env("PATH", append_to_path(&config.sox_dir()))
         // The launcher has no console, so Python otherwise inherits the
