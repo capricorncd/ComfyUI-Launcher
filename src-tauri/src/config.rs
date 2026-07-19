@@ -25,6 +25,10 @@ impl Config {
         Path::new(&self.root_path).join("ComfyUI").join("main.py")
     }
 
+    pub fn comfyui_dir(&self) -> PathBuf {
+        Path::new(&self.root_path).join("ComfyUI")
+    }
+
     pub fn custom_nodes_dir(&self) -> PathBuf {
         Path::new(&self.root_path).join("ComfyUI").join("custom_nodes")
     }
@@ -35,6 +39,14 @@ impl Config {
 
     pub fn models_dir(&self) -> PathBuf {
         Path::new(&self.root_path).join("ComfyUI").join("models")
+    }
+
+    /// `run_nvidia_gpu.bat` prepends this to PATH before launching Python —
+    /// some nodes (audio/video processing) shell out to the bundled `sox`
+    /// binary and fail to import without it, which crashes ComfyUI's own
+    /// startup (not just that node) if it happens early enough.
+    pub fn sox_dir(&self) -> PathBuf {
+        Path::new(&self.root_path).join("ComfyUI").join("sox")
     }
 
     /// Returns an error message describing why this root path doesn't look

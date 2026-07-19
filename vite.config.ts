@@ -18,6 +18,7 @@ export default defineConfig(async () => ({
         main: r("index.html"),
         nodes: r("nodes.html"),
         settings: r("settings.html"),
+        log: r("log.html"),
       },
     },
   },

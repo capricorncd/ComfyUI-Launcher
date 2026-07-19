@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="/src/styles.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>日志</title>
+    <script type="module" src="/src/log.ts" defer></script>
+  </head>
+
+  <body>
+    <main class="page">
+      <h1>ComfyUI 日志</h1>
+
+      <div class="toolbar">
+        <button id="refresh-btn">刷新</button>
+        <span class="hint">显示最近的 ComfyUI 进程输出</span>
+      </div>
+
+      <pre class="log-viewer" id="log-viewer">加载中...</pre>
+    </main>
+  </body>
+</html>

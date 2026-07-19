@@ -195,25 +195,64 @@ pub async fn check_updates(config: &Config) -> Result<Vec<UpdateCheck>, String> 
     Ok(results)
 }
 
+/// The repo's default branch on the remote, e.g. "master" or "main".
+/// Requires `origin` to already have been fetched.
+async fn default_branch(dir: &Path) -> Option<String> {
+    if let Ok(out) = run_git(dir, &["symbolic-ref", "refs/remotes/origin/HEAD"]).await {
+        if let Some(branch) = out.strip_prefix("refs/remotes/origin/") {
+            return Some(branch.to_string());
+        }
+    }
+    for candidate in ["master", "main"] {
+        let ref_name = format!("refs/remotes/origin/{candidate}");
+        if run_git(dir, &["show-ref", "--verify", "--quiet", &ref_name]).await.is_ok() {
+            return Some(candidate.to_string());
+        }
+    }
+    None
+}
+
+/// Portable ComfyUI/node installs are often checked out at a specific commit
+/// (detached HEAD) rather than a branch, which plain `git pull` can't handle
+/// ("You are not currently on a branch"). This fetches first, checks out the
+/// remote's default branch if not already on one, then pulls.
+async fn pull_repo(dir: &Path) -> Result<String, String> {
+    run_git(dir, &["fetch", "origin"]).await?;
+    if run_git(dir, &["symbolic-ref", "-q", "HEAD"]).await.is_err() {
+        let branch = default_branch(dir)
+            .await
+            .ok_or_else(|| "当前不在任何分支上，且无法确定默认分支".to_string())?;
+        run_git(dir, &["checkout", &branch]).await?;
+    }
+    run_git(dir, &["pull", "--ff-only"]).await
+}
+
+async fn pull_repo_result(dir: &Path) -> ActionResult {
+    match pull_repo(dir).await {
+        Ok(out) => ActionResult {
+            success: true,
+            message: if out.is_empty() { "已是最新".to_string() } else { out },
+        },
+        Err(err) => ActionResult { success: false, message: err },
+    }
+}
+
+/// Pulls the latest ComfyUI core code itself (not a custom node) from its
+/// configured git remote.
+pub async fn update_comfyui(config: &Config) -> Result<ActionResult, String> {
+    let dir = config.comfyui_dir();
+    if !dir.join(".git").exists() {
+        return Err(format!("{} 不是一个 git 仓库，无法更新", dir.display()));
+    }
+    Ok(pull_repo_result(&dir).await)
+}
+
 pub async fn pull_node(config: &Config, name: &str) -> Result<ActionResult, String> {
     let dir = config.custom_nodes_dir().join(name);
     if !dir.join(".git").exists() {
         return Err(format!("{name} 不是一个 git 仓库"));
     }
-    match run_git(&dir, &["pull", "--ff-only"]).await {
-        Ok(out) => Ok(ActionResult {
-            success: true,
-            message: if out.is_empty() {
-                "已是最新".to_string()
-            } else {
-                out
-            },
-        }),
-        Err(err) => Ok(ActionResult {
-            success: false,
-            message: err,
-        }),
-    }
+    Ok(pull_repo_result(&dir).await)
 }
 
 fn derive_dir_name(url: &str) -> String {
