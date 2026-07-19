@@ -26,12 +26,13 @@ pub fn build_and_attach(app: &AppHandle) -> Result<(), String> {
         .map_err(|e| e.to_string())?;
 
     let file_menu = SubmenuBuilder::new(app, "File")
-        .item(&start_restart)
         .item(&reload_page)
-        .item(&update_comfyui)
         .separator()
         .item(&manage_nodes)
         .item(&open_submenu)
+        .separator()
+        .item(&start_restart)
+        .item(&update_comfyui)
         .separator()
         .item(&settings)
         .build()
