@@ -16,6 +16,15 @@ pub fn build_and_attach(app: &AppHandle) -> Result<(), String> {
     let open_output_dir = MenuItemBuilder::with_id("open_output_dir", "输出目录").build(app).map_err(|e| e.to_string())?;
     let open_models_dir = MenuItemBuilder::with_id("open_models_dir", "模型目录").build(app).map_err(|e| e.to_string())?;
     let settings = MenuItemBuilder::with_id("settings", "设置").build(app).map_err(|e| e.to_string())?;
+    let build_info_text = format!(
+        "版本 {} · 构建 {}",
+        env!("CARGO_PKG_VERSION"),
+        env!("APP_BUILD_TIME")
+    );
+    let build_info = MenuItemBuilder::with_id("build_info", build_info_text)
+        .enabled(false)
+        .build(app)
+        .map_err(|e| e.to_string())?;
 
     let open_submenu = SubmenuBuilder::new(app, "打开")
         .item(&open_comfyui_dir)
@@ -35,6 +44,8 @@ pub fn build_and_attach(app: &AppHandle) -> Result<(), String> {
         .item(&update_comfyui)
         .separator()
         .item(&settings)
+        .separator()
+        .item(&build_info)
         .build()
         .map_err(|e| e.to_string())?;
 
