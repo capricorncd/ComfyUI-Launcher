@@ -9,6 +9,16 @@ use crate::config::Config;
 
 const MAX_CONCURRENT_GIT: usize = 8;
 
+fn git_command() -> TokioCommand {
+    let mut command = TokioCommand::new("git");
+    #[cfg(windows)]
+    {
+        const CREATE_NO_WINDOW: u32 = 0x08000000;
+        command.creation_flags(CREATE_NO_WINDOW);
+    }
+    command
+}
+
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct NodeInfo {
@@ -44,7 +54,7 @@ pub struct UpdateCheck {
 }
 
 async fn run_git(dir: &Path, args: &[&str]) -> Result<String, String> {
-    let output = TokioCommand::new("git")
+    let output = git_command()
         .arg("-C")
         .arg(dir)
         .args(args)
@@ -121,7 +131,7 @@ pub async fn list_custom_nodes(config: &Config) -> Result<Vec<NodeInfo>, String>
 /// Lightweight remote HEAD lookup (`git ls-remote`) — just a ref listing,
 /// no objects are fetched, so this is cheap enough to run for every node.
 async fn remote_head_hash(url: &str) -> Option<String> {
-    let output = TokioCommand::new("git")
+    let output = git_command()
         .args(["ls-remote", url, "HEAD"])
         .output()
         .await
@@ -276,7 +286,7 @@ pub async fn clone_node(config: &Config, url: &str) -> Result<CloneResult, Strin
         });
     }
 
-    let output = TokioCommand::new("git")
+    let output = git_command()
         .arg("-C")
         .arg(&base)
         .arg("clone")
