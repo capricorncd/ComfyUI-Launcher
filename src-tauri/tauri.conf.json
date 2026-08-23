@@ -14,6 +14,7 @@
     "windows": [
       {
         "label": "main",
+        "create": false,
         "title": "ComfyUI Launcher",
         "url": "index.html",
         "width": 1280,
@@ -22,6 +23,7 @@
         "minHeight": 600,
         "dragDropEnabled": false,
         "devtools": true,
+        "zoomHotkeysEnabled": true,
         "maximized": true
       }
     ],

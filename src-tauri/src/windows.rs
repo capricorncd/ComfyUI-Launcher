@@ -1,3 +1,4 @@
+use tauri::webview::NewWindowResponse;
 use tauri::{AppHandle, Manager, WebviewUrl, WebviewWindowBuilder};
 use tauri_plugin_opener::OpenerExt;
 
@@ -17,7 +18,10 @@ fn open_or_focus(
     }
     let mut builder = WebviewWindowBuilder::new(app, label, WebviewUrl::App(url_path.into()))
         .title(title)
-        .inner_size(size.0, size.1);
+        .inner_size(size.0, size.1)
+        .enable_clipboard_access()
+        .zoom_hotkeys_enabled(true)
+        .on_new_window(|_, _| NewWindowResponse::Allow);
     if center {
         builder = builder.center();
     }
