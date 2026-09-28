@@ -1,5 +1,9 @@
 # ComfyUI Launcher
 
+## 许可证
+
+本项目采用 [Apache License 2.0](LICENSE) 许可证。
+
 基于 Tauri v2（Rust + WebView）的 ComfyUI 桌面启动器。程序启动后自动拉起本地 ComfyUI（`python_embeded\python.exe -s ComfyUI\main.py`），等待其就绪后在主窗口中直接显示 ComfyUI 网页界面；窗口原生菜单栏提供 **File** 菜单，包含：
 
 - **启动/重启** — 结束当前 ComfyUI 进程（含子进程）并重新启动
