@@ -89,4 +89,4 @@ File → 打开 → 日志目录可查看日志（Windows：`%LOCALAPPDATA%\com.
 
 ## 许可证
 
-本项目采用 [Apache License 2.0](https://github.com/capricorncd/ComfyUI-Launcher/blob/main/LICENSE) 许可证。
+本项目采用 [Apache License 2.0](./LICENSE) 许可证。
