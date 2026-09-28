@@ -7,6 +7,8 @@
 - **打开自定义节点目录 / 打开输出目录 / 打开模型目录** — 在资源管理器中打开对应目录
 - **设置** — 配置 ComfyUI 安装根目录；首次启动或路径无效时会自动弹出该窗口
 
+可配合 [ComfyUI-Capricorncd-Timeline](https://github.com/capricorncd/ComfyUI-Capricorncd-Timeline) 使用，在时间轴编辑器中通过系统原生对话框选择项目和导出目录。详细说明见下方「Timeline 项目保存」。
+
 ## 环境要求
 
 - [Node.js](https://nodejs.org/)（建议 v20+）与 npm
@@ -70,6 +72,8 @@ comfyui-launcher/
 ```
 
 ## Timeline 项目保存
+
+在 ComfyUI 中安装 [ComfyUI-Capricorncd-Timeline](https://github.com/capricorncd/ComfyUI-Capricorncd-Timeline) 后，通过本启动器打开 ComfyUI，即可在 Timeline 中使用启动器提供的原生目录选择功能。Timeline 需单独安装，不随启动器附带。
 
 主窗口在 `http://127.0.0.1:8188` 的顶层页面注入 `window.__COMFYUI_LAUNCHER__`（`apiVersion: 1`），通过 `capabilities.projectDirectory` 检测原生目录选择能力。`pickDirectory()` 返回所选目录的绝对路径，取消时返回 `null`。该对象用于能力检测，不作为文件访问的授权凭据；远程页面仅获准调用目录选择命令。
 
