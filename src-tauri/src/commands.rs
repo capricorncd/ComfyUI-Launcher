@@ -5,6 +5,17 @@ use crate::config::{self, Config};
 use crate::nodes::{self, ActionResult, CloneResult, NodeInfo, UpdateCheck};
 use crate::state::{AppState, ComfyStatus};
 use crate::{process, windows};
+use tauri_plugin_dialog::DialogExt;
+
+#[tauri::command]
+pub async fn launcher_pick_directory(app: AppHandle) -> Result<Option<String>, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        app.dialog().file().blocking_pick_folder()
+            .map(|file| file.into_path().map(|path| path.to_string_lossy().into_owned())
+                .map_err(|error| error.to_string()))
+            .transpose()
+    }).await.map_err(|error| error.to_string())?
+}
 
 #[tauri::command]
 pub fn get_status(state: State<Arc<AppState>>) -> ComfyStatus {

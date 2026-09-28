@@ -7,6 +7,7 @@ use url::Url;
 
 use crate::state::{AppState, ComfyStatus};
 use crate::windows;
+use crate::logs::ProcessLog;
 
 const COMFY_URL: &str = "http://127.0.0.1:8188/";
 
@@ -136,9 +137,25 @@ pub async fn start_or_restart(app: AppHandle, state: Arc<AppState>) -> Result<()
         return Ok(());
     }
 
+    let log_dir = app.path().app_log_dir().map_err(|e| e.to_string())?;
+    let disk_log = match ProcessLog::new(log_dir.clone()) {
+        Ok(log) => Arc::new(log),
+        Err(e) => {
+            set_status(&app, &state, ComfyStatus::Failed {
+                message: format!("无法创建日志 {}: {e}", log_dir.display()),
+                log_tail: vec![],
+            });
+            return Ok(());
+        }
+    };
+    record_log(&app, &disk_log, "launcher", &format!("Starting Python: {} | ComfyUI: {}", config.python_exe().display(), config.main_py().display()));
+
     let mut command = TokioCommand::new(config.python_exe());
     command
         .current_dir(&config.root_path)
+        .arg("-u")
+        .arg("-X")
+        .arg("faulthandler")
         .arg("-s")
         .arg(config.main_py())
         .arg("--windows-standalone-build")
@@ -163,6 +180,7 @@ pub async fn start_or_restart(app: AppHandle, state: Arc<AppState>) -> Result<()
     let mut child: Child = match command.spawn() {
         Ok(c) => c,
         Err(e) => {
+            record_log(&app, &disk_log, "launcher", &format!("Spawn failed: {e}"));
             set_status(
                 &app,
                 &state,
@@ -178,11 +196,13 @@ pub async fn start_or_restart(app: AppHandle, state: Arc<AppState>) -> Result<()
     let pid = child.id();
     state.comfy.lock().unwrap().pid = pid;
 
+    record_log(&app, &disk_log, "launcher", &format!("Started PID {pid:?}"));
+    let mut readers = Vec::new();
     if let Some(stdout) = child.stdout.take() {
-        spawn_log_reader(app.clone(), state.clone(), my_gen, stdout);
+        readers.push(spawn_log_reader(app.clone(), state.clone(), my_gen, disk_log.clone(), "stdout", stdout));
     }
     if let Some(stderr) = child.stderr.take() {
-        spawn_log_reader(app.clone(), state.clone(), my_gen, stderr);
+        readers.push(spawn_log_reader(app.clone(), state.clone(), my_gen, disk_log.clone(), "stderr", stderr));
     }
 
     let app2 = app.clone();
@@ -197,8 +217,10 @@ pub async fn start_or_restart(app: AppHandle, state: Arc<AppState>) -> Result<()
             tokio::select! {
                 biased;
                 exit = child.wait() => {
+                    record_log(&app2, &disk_log, "launcher", &format!("Process exited: {exit:?}"));
+                    drain_readers(&mut readers).await;
                     if state2.comfy.lock().unwrap().generation != my_gen {
-                        return; // superseded by a newer restart
+                        return;
                     }
                     let code = exit.map(|s| s.code().unwrap_or(-1)).unwrap_or(-1);
                     let log_tail = {
@@ -210,6 +232,7 @@ pub async fn start_or_restart(app: AppHandle, state: Arc<AppState>) -> Result<()
                         message: format!("ComfyUI 进程已退出（退出码 {code}）"),
                         log_tail,
                     });
+                    navigate_home(&app2, &state2);
                     return;
                 }
                 _ = tokio::time::sleep(Duration::from_millis(500)) => {
@@ -232,6 +255,8 @@ pub async fn start_or_restart(app: AppHandle, state: Arc<AppState>) -> Result<()
         // holding `child` and watch for it exiting unexpectedly (crash, or
         // killed by taskkill from an explicit restart elsewhere).
         let exit = child.wait().await;
+        record_log(&app2, &disk_log, "launcher", &format!("Process exited: {exit:?}"));
+        drain_readers(&mut readers).await;
         if state2.comfy.lock().unwrap().generation == my_gen {
             let code = exit.map(|s| s.code().unwrap_or(-1)).unwrap_or(-1);
             let log_tail = {
@@ -243,28 +268,55 @@ pub async fn start_or_restart(app: AppHandle, state: Arc<AppState>) -> Result<()
                 message: format!("ComfyUI 进程已退出（退出码 {code}）"),
                 log_tail,
             });
+            navigate_home(&app2, &state2);
         }
     });
 
     Ok(())
 }
 
-fn spawn_log_reader<R>(app: AppHandle, state: Arc<AppState>, my_gen: u64, reader: R)
+fn record_log(app: &AppHandle, log: &ProcessLog, source: &str, text: &str) {
+    if let Err(e) = log.write(source, text) {
+        let _ = app.emit("comfy-log", format!("日志写入失败: {e}"));
+    }
+}
+
+async fn drain_readers(readers: &mut Vec<tauri::async_runtime::JoinHandle<()>>) {
+    for mut reader in readers.drain(..) {
+        if tokio::time::timeout(Duration::from_secs(2), &mut reader).await.is_err() {
+            reader.abort();
+        }
+    }
+}
+
+fn spawn_log_reader<R>(app: AppHandle, state: Arc<AppState>, my_gen: u64, disk_log: Arc<ProcessLog>, source: &'static str, reader: R) -> tauri::async_runtime::JoinHandle<()>
 where
     R: tokio::io::AsyncRead + Unpin + Send + 'static,
 {
     tauri::async_runtime::spawn(async move {
-        let mut lines = BufReader::new(reader).lines();
-        while let Ok(Some(line)) = lines.next_line().await {
+        let mut reader = BufReader::new(reader);
+        let mut bytes = Vec::new();
+        loop {
+            bytes.clear();
+            match reader.read_until(b'\n', &mut bytes).await {
+                Ok(0) => break,
+                Ok(_) => {},
+                Err(e) => {
+                    record_log(&app, &disk_log, "launcher", &format!("{source} read failed: {e}"));
+                    break;
+                }
+            }
+            let line = String::from_utf8_lossy(&bytes).trim_end_matches(['\r', '\n']).to_string();
+            record_log(&app, &disk_log, source, &line);
             let mut comfy = state.comfy.lock().unwrap();
             if comfy.generation != my_gen {
-                return; // superseded by a newer restart
+                continue; // keep draining the old process into its log
             }
             comfy.push_log(line.clone());
             drop(comfy);
             let _ = app.emit("comfy-log", line);
         }
-    });
+    })
 }
 
 pub fn get_status(state: &AppState) -> ComfyStatus {

@@ -1,0 +1,8 @@
+{
+  "identifier": "timeline",
+  "description": "Native directory picker for the local ComfyUI page",
+  "windows": ["main"],
+  "local": false,
+  "remote": { "urls": ["http://127.0.0.1:8188/*"] },
+  "permissions": ["allow-launcher-pick-directory"]
+}

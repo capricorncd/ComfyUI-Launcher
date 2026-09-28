@@ -1,7 +1,13 @@
 fn main() {
     let build_time = build_time();
     println!("cargo:rustc-env=APP_BUILD_TIME={build_time}");
-    tauri_build::build()
+    tauri_build::try_build(tauri_build::Attributes::new().app_manifest(
+        tauri_build::AppManifest::new().commands(&[
+            "get_status", "start_or_restart", "get_config", "save_config",
+            "list_custom_nodes", "pull_node", "clone_node", "check_node_updates",
+            "open_folder", "launcher_pick_directory",
+        ]),
+    )).expect("failed to build launcher permissions");
 }
 
 fn build_time() -> String {

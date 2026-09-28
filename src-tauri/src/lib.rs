@@ -1,6 +1,7 @@
 mod commands;
 mod config;
 mod menu;
+mod logs;
 mod nodes;
 mod process;
 mod state;
@@ -38,6 +39,7 @@ pub fn run() {
                 .first()
                 .ok_or_else(|| std::io::Error::other("main window config is missing"))?;
             WebviewWindowBuilder::from_config(app.handle(), main_config)?
+                .initialization_script(include_str!("launcher.js"))
                 // ComfyUI uses the Clipboard API for copying and pasting
                 // workflow data. Wry leaves clipboard-read access disabled by
                 // default even though regular browsers expose it to localhost.
@@ -99,6 +101,7 @@ pub fn run() {
             commands::clone_node,
             commands::check_node_updates,
             commands::open_folder,
+            commands::launcher_pick_directory,
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application");

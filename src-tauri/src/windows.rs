@@ -82,6 +82,7 @@ pub fn open_folder(app: &AppHandle, state: &AppState, kind: &str) -> Result<(), 
         "custom_nodes" => config.custom_nodes_dir(),
         "output" => config.output_dir(),
         "models" => config.models_dir(),
+        "logs" => app.path().app_log_dir().map_err(|e| e.to_string())?,
         other => return Err(format!("未知的目录类型: {other}")),
     };
     if !path.is_dir() {

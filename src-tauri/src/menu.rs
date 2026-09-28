@@ -15,6 +15,7 @@ pub fn build_and_attach(app: &AppHandle) -> Result<(), String> {
     let open_nodes_dir = MenuItemBuilder::with_id("open_nodes_dir", "自定义节点目录").build(app).map_err(|e| e.to_string())?;
     let open_output_dir = MenuItemBuilder::with_id("open_output_dir", "输出目录").build(app).map_err(|e| e.to_string())?;
     let open_models_dir = MenuItemBuilder::with_id("open_models_dir", "模型目录").build(app).map_err(|e| e.to_string())?;
+    let open_logs_dir = MenuItemBuilder::with_id("open_logs_dir", "日志目录").build(app).map_err(|e| e.to_string())?;
     let settings = MenuItemBuilder::with_id("settings", "设置").build(app).map_err(|e| e.to_string())?;
     let build_info_text = format!(
         "版本 {} · 构建 {}",
@@ -31,6 +32,7 @@ pub fn build_and_attach(app: &AppHandle) -> Result<(), String> {
         .item(&open_nodes_dir)
         .item(&open_output_dir)
         .item(&open_models_dir)
+        .item(&open_logs_dir)
         .build()
         .map_err(|e| e.to_string())?;
 
@@ -98,6 +100,9 @@ pub fn build_and_attach(app: &AppHandle) -> Result<(), String> {
             }
             "open_models_dir" => {
                 let _ = windows::open_folder(app, &state, "models");
+            }
+            "open_logs_dir" => {
+                let _ = windows::open_folder(app, &state, "logs");
             }
             "settings" => {
                 let _ = windows::open_settings_window(app);
