@@ -1,9 +1,5 @@
 # ComfyUI Launcher
 
-## 许可证
-
-本项目采用 [Apache License 2.0](LICENSE) 许可证。
-
 基于 Tauri v2（Rust + WebView）的 ComfyUI 桌面启动器。程序启动后自动拉起本地 ComfyUI（`python_embeded\python.exe -s ComfyUI\main.py`），等待其就绪后在主窗口中直接显示 ComfyUI 网页界面；窗口原生菜单栏提供 **File** 菜单，包含：
 
 - **启动/重启** — 结束当前 ComfyUI 进程（含子进程）并重新启动
@@ -86,3 +82,7 @@ comfyui-launcher/
 ## 运行日志
 
 File → 打开 → 日志目录可查看日志（Windows：`%LOCALAPPDATA%\com.comfyuilauncher.app\logs`）。按 UTC 日期保存 `comfyui-YYYY-MM-DD.log`，保留当天及前 6 天，启动和跨天写入时清理旧日志。记录标准输出、标准错误、启动路径、进程号和退出状态；Python 使用无缓冲输出并启用故障堆栈。进程退出后返回错误页。已在外部启动的 ComfyUI 无法采集输出，需通过启动器启动。
+
+## 许可证
+
+本项目采用 [Apache License 2.0](https://github.com/capricorncd/ComfyUI-Launcher/blob/main/LICENSE) 许可证。
