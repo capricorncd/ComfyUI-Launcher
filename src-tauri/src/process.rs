@@ -46,6 +46,27 @@ async fn kill_process_tree(pid: u32) {
     tokio::time::sleep(Duration::from_millis(200)).await;
 }
 
+async fn existing_comfy_pid(config: &crate::config::Config) -> Result<u32, String> {
+    let mut command = TokioCommand::new("powershell.exe");
+    command.args(["-NoProfile", "-NonInteractive", "-Command", r#"
+$ErrorActionPreference = 'Stop'
+$listener = Get-NetTCPConnection -LocalPort 8188 -State Listen | Where-Object LocalAddress -in @('127.0.0.1', '0.0.0.0', '::') | Select-Object -First 1
+$process = Get-CimInstance Win32_Process -Filter "ProcessId = $($listener.OwningProcess)"
+if ($process.ExecutablePath -ine $env:CAP_COMFY_PYTHON -or $process.CommandLine.IndexOf($env:CAP_COMFY_MAIN, [StringComparison]::OrdinalIgnoreCase) -lt 0) { exit 1 }
+$process.ProcessId
+"#])
+        .env("CAP_COMFY_PYTHON", config.python_exe())
+        .env("CAP_COMFY_MAIN", config.main_py());
+    #[cfg(windows)]
+    command.creation_flags(0x08000000);
+    let output = command.output().await.map_err(|e| e.to_string())?;
+    if !output.status.success() {
+        return Err("8188 端口的进程不属于配置的 ComfyUI，无法接管。".to_string());
+    }
+    String::from_utf8_lossy(&output.stdout).trim().parse::<u32>()
+        .map_err(|_| "无法确定 ComfyUI 进程，无法接管。".to_string())
+}
+
 /// Stops the ComfyUI process tree during application shutdown. This is
 /// intentionally synchronous because the async runtime may already be
 /// shutting down when Tauri delivers `ExitRequested`.
@@ -107,16 +128,18 @@ pub async fn start_or_restart(app: AppHandle, state: Arc<AppState>) -> Result<()
     }
     set_status(&app, &state, ComfyStatus::Starting);
 
-    // Something is already listening on the port and it isn't a process we
-    // just killed above — most likely ComfyUI was started outside this app
-    // (e.g. via run_nvidia_gpu.bat), or a previous launch of this app was
-    // force-closed and orphaned its ComfyUI child. Spawning our own on top
-    // would either fail to bind or race with the existing one, and either
-    // way leaves a duplicate process running invisibly in the background.
-    // Adopt the existing server instead of spawning a redundant copy.
+    // Track an existing installation's server so restart and exit also stop it.
     if is_comfy_responding(COMFY_URL).await {
+        let config = state.config.lock().unwrap().clone();
+        let pid = match existing_comfy_pid(&config).await {
+            Ok(pid) => pid,
+            Err(message) => {
+                set_status(&app, &state, ComfyStatus::Failed { message, log_tail: vec![] });
+                return Ok(());
+            }
+        };
         if state.comfy.lock().unwrap().generation == my_gen {
-            state.comfy.lock().unwrap().pid = None;
+            state.comfy.lock().unwrap().pid = Some(pid);
             set_status(&app, &state, ComfyStatus::Ready { url: COMFY_URL.to_string() });
             navigate_to_comfy(&app);
         }
