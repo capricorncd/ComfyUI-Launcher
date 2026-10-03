@@ -8,9 +8,9 @@ use crate::{process, windows};
 use tauri_plugin_dialog::DialogExt;
 
 #[tauri::command]
-pub async fn launcher_pick_directory(app: AppHandle) -> Result<Option<String>, String> {
+pub async fn launcher_pick_directory(app: AppHandle, window: tauri::WebviewWindow) -> Result<Option<String>, String> {
     tauri::async_runtime::spawn_blocking(move || {
-        app.dialog().file().blocking_pick_folder()
+        app.dialog().file().set_parent(&window).blocking_pick_folder()
             .map(|file| file.into_path().map(|path| path.to_string_lossy().into_owned())
                 .map_err(|error| error.to_string()))
             .transpose()

@@ -44,6 +44,7 @@ pub fn run() {
                 .first()
                 .ok_or_else(|| std::io::Error::other("main window config is missing"))?;
             WebviewWindowBuilder::from_config(app.handle(), main_config)?
+                .initialization_script(include_str!("keyboard.js"))
                 .initialization_script(include_str!("launcher.js"))
                 // ComfyUI uses the Clipboard API for copying and pasting
                 // workflow data. Wry leaves clipboard-read access disabled by
