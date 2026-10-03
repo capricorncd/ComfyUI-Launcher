@@ -17,7 +17,6 @@ fn open_or_focus(
         return Ok(());
     }
     let mut builder = WebviewWindowBuilder::new(app, label, WebviewUrl::App(url_path.into()))
-        .initialization_script(include_str!("keyboard.js"))
         .title(title)
         .inner_size(size.0, size.1)
         .enable_clipboard_access()
